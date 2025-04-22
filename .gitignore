@@ -1,0 +1,63 @@
+# -----------------------------------------
+# Python
+# -----------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv/
+venv/
+pip-wheel-metadata/
+*.log
+
+# -----------------------------------------
+# Poetry / pipenv / requirements
+# -----------------------------------------
+poetry.lock
+Pipfile.lock
+
+# -----------------------------------------
+# VS Code / IDEs
+# -----------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# -----------------------------------------
+# Testes
+# -----------------------------------------
+.coverage
+.tox/
+pytest_cache/
+htmlcov/
+.nox/
+
+# -----------------------------------------
+# Arquivos temporários e do sistema
+# -----------------------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------------------
+# Docker / Compose
+# -----------------------------------------
+*.pid
+*.pid.lock
+.env
+docker-compose.override.yml
+
+# -----------------------------------------
+# Migrations Flyway
+# -----------------------------------------
+flyway.conf
+/flyway/sql/*.tmp.sql
+
+
