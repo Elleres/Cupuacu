@@ -1,11 +1,8 @@
-import uuid
+from uuid import UUID, uuid4
+from sqlmodel import Field, SQLModel
 
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import UUID
-from models.base import Base
-
-class User(Base):
-    __tablename__ = "users"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=False)
+class User(SQLModel, table=True):
+    __tablename__ = "user"  # <-- adiciona isso
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(nullable=False, max_length=255)
+    email: str = Field(nullable=False, max_length=255)

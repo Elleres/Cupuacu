@@ -4,13 +4,7 @@ from fastapi import FastAPI
 
 from api.v1.user import router as user_router
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.include_router(user_router)
 

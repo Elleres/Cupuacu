@@ -1,24 +1,31 @@
 import os
 import sys
 import pathlib
+import importlib
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from models import user
-from models.base import Base
-
-BASE_DIR = pathlib.Path(__file__).resolve().parents[1]
-sys.path.append(str(BASE_DIR))
-
-target_metadata = Base.metadata
+from sqlmodel import SQLModel
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Pega a URL síncrona
+BASE_DIR = pathlib.Path(__file__).resolve().parents[1]
+sys.path.append(str(BASE_DIR))
+
+models_path = BASE_DIR / "models"
+
+for model_file in models_path.glob("*.py"):
+    if model_file.name.startswith("_") or model_file.name == "__init__.py":
+        continue
+    module_name = f"models.{model_file.stem}"
+    importlib.import_module(module_name)
+
+target_metadata = SQLModel.metadata
+
 url = os.getenv("DATABASE_URL_ALEMBIC")
 if not url:
     raise Exception("Variável DATABASE_URL_ALEMBIC não encontrada!")
