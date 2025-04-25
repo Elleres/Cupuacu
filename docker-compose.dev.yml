@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -26,15 +28,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  flyway:
-    image: flyway/flyway:9-alpine
-    depends_on:
-      - db
-    env_file:
-      - .env
-    volumes:
-      - ./backend/migrations:/flyway/sql
-    command: -url=jdbc:postgresql://db:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} migrate
-
 volumes:
   postgres_data:
+  app:
