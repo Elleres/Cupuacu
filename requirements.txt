@@ -1,2 +1,7 @@
 uvicorn[standard]
-fastapi
+fastapi~=0.115.12
+alembic~=1.15.2
+psycopg2-binary
+sqlmodel~=0.0.24
+SQLAlchemy~=2.0.40
+asyncpg

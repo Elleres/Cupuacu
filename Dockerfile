@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y build-essential netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
@@ -8,4 +8,10 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 WORKDIR app/
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+COPY entrypoint.sh /entrypoint.sh
+
+COPY .env .env
+
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
