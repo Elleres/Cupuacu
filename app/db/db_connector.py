@@ -6,9 +6,16 @@ from sqlmodel import SQLModel
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-# Looks up in the .env file for a DATABASE_URL variable; the second string is the default value in case the variable is
-# not found
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/db")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")  # default = development
+
+if ENVIRONMENT == "development":
+    DATABASE_URL = os.getenv("DATABASE_URL")
+elif ENVIRONMENT == "test":
+    DATABASE_URL = os.getenv("DATABASE_URL_TEST")
+elif ENVIRONMENT == "production":
+    DATABASE_URL = os.getenv("DATABASE_URL_PROD")
+else:
+    raise ValueError(f"ENVIRONMENT {ENVIRONMENT} não reconhecido!")
 
 class DatabaseConnector:
     def __init__(self, db_url: str):

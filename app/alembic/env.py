@@ -2,8 +2,10 @@ import os
 import sys
 import pathlib
 import importlib
+
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
@@ -26,6 +28,7 @@ for model_file in models_path.glob("*.py"):
 
 target_metadata = SQLModel.metadata
 
+load_dotenv()
 url = os.getenv("DATABASE_URL_ALEMBIC")
 if not url:
     raise Exception("Variável DATABASE_URL_ALEMBIC não encontrada!")

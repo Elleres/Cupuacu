@@ -12,6 +12,7 @@ services:
     env_file:
       - .env
     environment:
+      ENVIRONMENT: dev
       DATABASE_URL: ${DATABASE_URL}
     restart: always
 
