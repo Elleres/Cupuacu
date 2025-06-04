@@ -32,3 +32,8 @@ ItemUpdate. Evita expor diretamente os modelos ORM.
 
 Contém a lógica de negócio. Regras de negócio que usam os repositórios. Ex: envio de e-mail, verificação de senha, 
 cálculo de preços. Pode ser dividido por contexto (ex: user_service.py).
+
+
+### utils
+
+código que não encaixar em nenhuma das supracitadas.
