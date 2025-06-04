@@ -1,0 +1,16 @@
+name: SonarQube PR Analysis
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Aqui a gente vai adicionar os próximos passos depois
