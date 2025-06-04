@@ -8,3 +8,5 @@ asyncpg
 pytest
 httpx
 pytest-asyncio
+requests
+
