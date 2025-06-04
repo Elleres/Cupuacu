@@ -6,9 +6,9 @@ from sqlmodel import SQLModel
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")  # default = development
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # default = development
 
-if ENVIRONMENT == "development":
+if ENVIRONMENT == "dev":
     DATABASE_URL = os.getenv("DATABASE_URL")
 elif ENVIRONMENT == "test":
     DATABASE_URL = os.getenv("DATABASE_URL_TEST")
@@ -28,7 +28,7 @@ class DatabaseConnector:
 
     @asynccontextmanager
     async def get_session(self):
-        async with self.async_session() as session:
+        async with self.async_session as session:
             yield session
 
     async def init_db(self):
@@ -37,3 +37,7 @@ class DatabaseConnector:
 
 
 db = DatabaseConnector(DATABASE_URL)
+
+async def get_db():
+    async with db.async_session() as session:
+        yield session
