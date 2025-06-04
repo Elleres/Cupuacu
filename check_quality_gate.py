@@ -3,7 +3,7 @@ import requests
 import sys
 
 SONAR_HOST_URL = os.environ["SONAR_HOST_URL"]
-SONAR_TOKEN = os.environ["SONARQUBE_TOKEN"]
+SONAR_TOKEN = os.environ["SONAR_TOKEN"]
 PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
 
 def get_quality_gate_status():
