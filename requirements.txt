@@ -5,8 +5,9 @@ psycopg2-binary
 sqlmodel~=0.0.24
 SQLAlchemy~=2.0.40
 asyncpg
-pytest
-httpx
-pytest-asyncio
 requests
-
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic[email]
+bcrypt<4.0
+python-multipart
