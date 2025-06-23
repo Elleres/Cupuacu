@@ -64,7 +64,7 @@ async def authenticate_user(
         db: AsyncSession,
         credentials: UserLogin,
 ):
-    user = await get_user_by_email(db, credentials.username)
+    user = await get_user_by_username(db, credentials.username)
     if not user:
         await instance_not_found(
             "Username"

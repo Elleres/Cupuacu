@@ -22,6 +22,20 @@ async def create_user_endpoint(
         user: UserCreate,
         db: AsyncSession = Depends(get_db)
 ):
+    """
+    Processa a requisição para criar um novo usuário.
+
+    **Parâmetros:**
+    - `user`: Objeto `UserCreate` contendo os dados do novo usuário (nome, email, username, password e type).
+
+    **Retorna:**
+    - `UserResponse`: Objeto contendo os dados do usuário criado, excluindo a senha.
+
+    **Levanta:**
+    - `HTTPException` com status 400 se os dados violarem alguma restrição do banco de dados.
+    - `HTTPException` com status 500 para erros não documentados.
+    """
+
     hashed_password = await hash_password(user.password)
     user.password = hashed_password
 
@@ -37,6 +51,20 @@ async def create_token_endpoint(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         db: AsyncSession = Depends(get_db)
 ):
+    """
+    Processa a requisição para autenticar um usuário e gerar um token de acesso.
+
+    **Parâmetros:**
+    - `form_data`: Objeto `OAuth2PasswordRequestForm` contendo o nome de usuário e a senha.
+      Estes são esperados como dados de formulário (`application/x-www-form-urlencoded`).
+
+    **Retorna:**
+    - `Token`: Objeto contendo o `access_token` JWT e o `token_type` (geralmente "bearer").
+
+    **Levanta:**
+    - `HTTPException` com status 401 se as credenciais (username/password) estiverem incorretas.
+    - `HTTPException` com status 404 se o username não estiver registrado no banco de dados.
+    """
     user_login = UserLogin(username=form_data.username, password=form_data.password)
     token = await authenticate_user(db, user_login)
     return token
@@ -46,6 +74,19 @@ async def read_users_me(
         token: str = Depends(oauth2_scheme),
         db: AsyncSession = Depends(get_db)
 ):
+    """
+    Recupera os detalhes do perfil do usuário atualmente autenticado.
+
+    **Parâmetros:**
+    - `token`: Token de acesso JWT fornecido no cabeçalho `Authorization` (Bearer Token).
+      Este parâmetro é injetado automaticamente pelo `oauth2_scheme` e não precisa ser passado explicitamente pelo cliente (SE ESTIVER USANDO O SWAGGER).
+
+    **Retorna:**
+    - `UserResponse`: Um objeto contendo os detalhes do usuário autenticado.
+
+    **Levanta:**
+    - `HTTPException` com status 401 (Não Autorizado) se o token for inválido, ausente ou expirado.
+    """
     current_user = await get_current_user(db, token)
 
     return current_user
