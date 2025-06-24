@@ -17,7 +17,7 @@ async def create_user(
 
     await db.refresh(db_user)
 
-    return UserResponse.model_validate(db_user.model_dump())
+    return db_user.model_dump()
 
 
 async def get_user_by_email(
