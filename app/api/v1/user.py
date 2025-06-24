@@ -15,7 +15,7 @@ from services.auth_service import authenticate_user, hash_password, get_current_
 from utils.exceptions import integrity_error_database
 from services.auth_service import oauth2_scheme
 
-router = APIRouter()
+router = APIRouter(tags=["user"])
 
 @router.post("/users")
 async def create_user_endpoint(
@@ -44,7 +44,7 @@ async def create_user_endpoint(
     except IntegrityError as e:
         await integrity_error_database(e)
 
-    return user
+    return UserResponse.model_validate(user)
 
 @router.post("/token", response_model=Token)
 async def create_token_endpoint(
