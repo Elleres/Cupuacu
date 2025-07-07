@@ -52,3 +52,12 @@ async def invalid_login():
             "loc": "Credentials",
         }
     )
+
+async def unauthorized():
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "msg": "Unauthorized",
+            "loc": "User type"
+        }
+    )
