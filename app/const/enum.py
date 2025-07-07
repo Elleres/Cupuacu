@@ -34,3 +34,9 @@ class UnitType(Enum):
     escola = "escola"
     secretaria = "secretaria"
     pro_reitoria = "pro_reitoria"
+
+
+class TicketStatusType(Enum):
+    open = "open"
+    closed = "closed"
+    on_hold = "on_hold"

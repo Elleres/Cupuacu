@@ -1,3 +1,4 @@
+from typing import Optional, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import UniqueConstraint
@@ -21,3 +22,4 @@ class User(SQLModel, table=True):
     type: UserType = Field(nullable=False)
 
     laboratory: "Laboratory" = Relationship(back_populates="user")
+    tickets: Optional[List["Ticket"]] = Relationship(back_populates="user")
