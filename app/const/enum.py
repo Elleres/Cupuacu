@@ -27,3 +27,16 @@ class InventionStatusType(Enum):
     pedido_de_protecao_depositado = "pedido_de_protecao_depositado"
     rejeitado = "rejeitado"
     titularidade_transferida = "titularidade_transferida"
+
+class UnitType(Enum):
+    insituto = "insituto"
+    faculdade = "faculdade"
+    escola = "escola"
+    secretaria = "secretaria"
+    pro_reitoria = "pro_reitoria"
+
+
+class TicketStatusType(Enum):
+    open = "open"
+    closed = "closed"
+    on_hold = "on_hold"
