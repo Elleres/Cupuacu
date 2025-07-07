@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.invention import Invention
-from schemas.invention import InventionCreate, InventionResponse
+from schemas.invention import InventionCreate
 
 
 async def create_invention(

@@ -1,8 +1,9 @@
 from datetime import date
+from typing import List
 from uuid import UUID, uuid4
 
 from sqlalchemy import UniqueConstraint, CheckConstraint
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 
 from const.enum import InventionType, InventionStatusType
 
@@ -18,6 +19,7 @@ class Invention(SQLModel, table=True):
 
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    id_unity: UUID = Field(foreign_key="unit.id", nullable=False)
     titulo: str = Field(nullable=False, max_length=255)
     descricao: str = Field(nullable=False, max_length=2000)
     situacao: InventionStatusType = Field(nullable=False)
@@ -25,4 +27,6 @@ class Invention(SQLModel, table=True):
     type: InventionType = Field(nullable=False)
     data_submissao: date = Field(nullable=False)
 
-    # Unidade, titulares e inventores será uma tabela a parte.
+    unit: "Unit" = Relationship(back_populates="inventions")
+    owners: List["InventionOwner"] = Relationship(back_populates="invention")
+    inventors: List["InventorInvention"] = Relationship(back_populates="invention")
