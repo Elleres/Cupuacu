@@ -1,4 +1,5 @@
 import os
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -8,7 +9,7 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.db_connector import DatabaseConnector
+from db.db_connector import DatabaseConnector, get_db
 from repositories.user_repositories import get_user_by_email, get_user_by_username
 from schemas.token import TokenData, Token
 from schemas.user import UserLogin, UserResponse
@@ -36,7 +37,7 @@ async def create_acess_token(
 
 
 async def get_current_user(
-        db: AsyncSession,
+        db: Annotated[AsyncSession, Depends(get_db)],
         token: str = Depends(oauth2_scheme)
 ):
     credentials_exception = HTTPException(
