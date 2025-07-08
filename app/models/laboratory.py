@@ -1,4 +1,5 @@
 from datetime import date
+from typing import List
 from uuid import UUID, uuid4
 
 from sqlalchemy import UniqueConstraint, CheckConstraint
@@ -25,3 +26,4 @@ class Laboratory(SQLModel, table=True):
 
     unit: "Unit" = Relationship(back_populates="laboratories")
     user: "User" = Relationship(back_populates="laboratory")
+    lab_members: List["LabMember"] = Relationship(back_populates="laboratory")
