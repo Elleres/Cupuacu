@@ -7,13 +7,13 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 from const.enum import UserType
 from db.db_connector import get_db
-from schemas.laboratory import LaboratoryResponse, LaboratoryCreate
+from schemas.laboratory import LaboratoryResponse, LaboratoryCreate, LaboratoryCreateAdmin
 from repositories.laboratory_repositories import create_laboratory, get_laboratory, delete_laboratory
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
 
-router = APIRouter(tags=["laboratory"])
+router = APIRouter(tags=["CRUD - laboratory"])
 
 
 @router.post("/laboratory", response_model=None)
@@ -22,7 +22,7 @@ async def create_laboratory_endpoint(
         current_user: UserResponse = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    if current_user.type != UserType.admin:
+    if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
         await unauthorized()
 
     try:
@@ -50,7 +50,7 @@ async def delete_laboratory_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: UserResponse = Depends(get_current_user)
 ):
-    if current_user.type != UserType.admin:
+    if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
         await unauthorized()
 
     resultado = await delete_laboratory(db, laboratory_id)

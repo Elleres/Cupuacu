@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import UniqueConstraint, CheckConstraint
 from sqlmodel import Field, SQLModel, Relationship
 
+from const.enum import LaboratoryStatusType
 
 
 class Laboratory(SQLModel, table=True):
@@ -20,6 +21,7 @@ class Laboratory(SQLModel, table=True):
     sigla: str = Field(nullable=False, max_length=255)
     resumo: str = Field(nullable=False, max_length=3000)
     condicao_de_uso: str = Field(nullable=False, max_length=3000)
+    status: LaboratoryStatusType = Field(nullable=False, default="on_hold")
 
     unit: "Unit" = Relationship(back_populates="laboratories")
     user: "User" = Relationship(back_populates="laboratory")

@@ -13,7 +13,7 @@ from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
 
-router = APIRouter(tags=["invention"])
+router = APIRouter(tags=["CRUD - invention"])
 
 
 @router.post("/invention", response_model=None)
