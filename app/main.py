@@ -17,7 +17,6 @@ if ENVIRONMENT == "prod":
     )
 else:
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-
     app = FastAPI(
         swagger_ui_parameters={"docExpansion": "none"}
     )
