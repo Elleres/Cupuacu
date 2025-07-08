@@ -1,14 +1,15 @@
+from typing import Union
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.laboratory import Laboratory
-from schemas.laboratory import LaboratoryCreate
+from schemas.laboratory import LaboratoryCreate, LaboratoryCreateAdmin
 
 
 async def create_laboratory(
         db: AsyncSession,
-        laboratory_create: LaboratoryCreate,
+        laboratory_create: Union[LaboratoryCreate, LaboratoryCreateAdmin],
 ):
     db_user = Laboratory(**laboratory_create.model_dump())
 

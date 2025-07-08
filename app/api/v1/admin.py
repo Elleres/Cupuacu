@@ -1,0 +1,56 @@
+
+from fastapi import APIRouter
+from fastapi.params import Depends
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from const.enum import UserType, UserStatusType
+from db.db_connector import get_db
+from repositories.laboratory_repositories import create_laboratory
+from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
+from schemas.user import  UserResponse, UserCreateAdmin
+
+from repositories.user_repositories import create_user
+from services.auth_service import hash_password, get_current_user
+from utils.exceptions import integrity_error_database, unauthorized
+
+router = APIRouter(prefix="/admin" ,tags=["admin"])
+
+
+@router.post("/users")
+async def create_user_endpoint(
+        user: UserCreateAdmin,
+        db: AsyncSession = Depends(get_db),
+        current_user: UserResponse = Depends(get_current_user)
+):
+    hashed_password = await hash_password(user.password)
+    user.password = hashed_password
+    user.status = UserStatusType.active
+
+    if current_user.type != UserType.admin:
+        await unauthorized()
+
+    try:
+        user = await create_user(db, user)
+    except IntegrityError as e:
+        await integrity_error_database(e)
+
+    return UserResponse.model_validate(user)
+
+
+
+@router.post("/laboratory", response_model=None)
+async def create_laboratory_endpoint(
+        laboratory: LaboratoryCreateAdmin,
+        current_user: UserResponse = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
+        await unauthorized()
+
+    try:
+        laboratory = await create_laboratory(db, laboratory)
+    except IntegrityError as e:
+        await integrity_error_database(e)
+
+    return LaboratoryResponse.model_validate(laboratory)
