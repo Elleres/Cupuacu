@@ -10,6 +10,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.db_connector import DatabaseConnector, get_db
+from main import ROOT_PATH_URL
 from repositories.user_repositories import get_user_by_email, get_user_by_username
 from schemas.token import TokenData, Token
 from schemas.user import UserLogin, UserResponse
@@ -19,7 +20,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'dev_example')
 ALGORITHM = os.getenv('ALGORITHM', 'HS256') # HS256 should be changed in future
 ACESS_TOKEN_EXPIRATION_MINUTES = 60
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=ROOT_PATH_URL + "/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
