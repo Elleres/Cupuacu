@@ -6,13 +6,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from const.enum import UserType, UserStatusType
 from db.db_connector import get_db
 from schemas.token import Token
-from schemas.user import UserCreate, UserLogin, UserResponse
+from schemas.user import UserCreate, UserLogin, UserResponse, UserCreateAdmin
 
 from repositories.user_repositories import create_user
 from services.auth_service import authenticate_user, hash_password, get_current_user
-from utils.exceptions import integrity_error_database
+from utils.exceptions import integrity_error_database, unauthorized
 from services.auth_service import oauth2_scheme
 
 router = APIRouter(tags=["user"])
@@ -20,7 +21,7 @@ router = APIRouter(tags=["user"])
 @router.post("/users")
 async def create_user_endpoint(
         user: UserCreate,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
 ):
     """
     Processa a requisição para criar um novo usuário.
@@ -35,9 +36,11 @@ async def create_user_endpoint(
     - `HTTPException` com status 400 se os dados violarem alguma restrição do banco de dados.
     - `HTTPException` com status 500 para erros não documentados.
     """
-
     hashed_password = await hash_password(user.password)
     user.password = hashed_password
+
+    if user.type == UserType.admin:
+        await unauthorized()
 
     try:
         user = await create_user(db, user)
@@ -45,6 +48,8 @@ async def create_user_endpoint(
         await integrity_error_database(e)
 
     return UserResponse.model_validate(user)
+
+
 
 @router.post("/token", response_model=Token)
 async def create_token_endpoint(

@@ -13,7 +13,7 @@ from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
 
-router = APIRouter(tags=["owner"])
+router = APIRouter(tags=["CRUD - owner"])
 
 
 @router.post("/owner", response_model=None)

@@ -40,3 +40,8 @@ class TicketStatusType(Enum):
     open = "open"
     closed = "closed"
     on_hold = "on_hold"
+
+class LaboratoryStatusType(Enum):
+    accepted = "accepted"
+    rejected = "rejected"
+    on_hold = "on_hold"

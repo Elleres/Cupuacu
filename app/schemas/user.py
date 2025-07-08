@@ -22,6 +22,9 @@ class UserCreate(BaseModel):
     username: str = Field(..., examples=["john_doe"])
     type: UserType = Field(..., examples=[UserType.gerente_laboratorio])
 
+class UserCreateAdmin(UserCreate):
+    status: UserStatusType
+
 class UserLogin(BaseModel):
     username: str
     password: str
