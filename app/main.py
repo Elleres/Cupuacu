@@ -8,7 +8,9 @@ from api.v1 import router
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-app = FastAPI()
+app = FastAPI(
+    swagger_ui_parameters={"docExpansion": "none"}
+)
 
 app.include_router(router)
 

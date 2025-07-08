@@ -1,13 +1,15 @@
+from typing import Union
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.user import UserCreate, UserResponse
+from schemas.user import UserCreate, UserResponse, UserCreateAdmin
 from models.user import User
 
 
 async def create_user(
         db: AsyncSession,
-        user: UserCreate
+        user: Union[UserCreate, UserCreateAdmin]
 ):
     db_user = User(**user.model_dump())
 
