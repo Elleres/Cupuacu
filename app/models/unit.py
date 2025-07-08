@@ -21,3 +21,4 @@ class Unit(SQLModel, table=True):
     tipo: UnitType = Field(nullable=False, default=UnitType.faculdade)
 
     inventions: List["Invention"] = Relationship(back_populates="unit")
+    laboratories: List["Laboratory"] = Relationship(back_populates="unit")

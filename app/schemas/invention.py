@@ -8,6 +8,7 @@ from const.enum import InventionType, InventionStatusType
 
 class InventionCreate(BaseModel):
 
+    id_unity: UUID = Field(..., example="a1b2c3d4-e5f6-7890-1234-567890abcdef")
     titulo: str = Field(..., example="Cadeira de Rodas Infantil Acessível")
     descricao: str = Field(
         ...,

@@ -14,12 +14,12 @@ class Laboratory(SQLModel, table=True):
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    id_unity: UUID = Field(foreign_key="unit.id", nullable=False)
-    id_user: UUID = Field(foreign_key="user.id", nullable=False)
+    id_unit: UUID = Field(foreign_key="unit.id", nullable=False)
+    id_user: UUID = Field(default=None, foreign_key="user.id")
     nome: str = Field(nullable=False, max_length=255)
     sigla: str = Field(nullable=False, max_length=255)
     resumo: str = Field(nullable=False, max_length=3000)
     condicao_de_uso: str = Field(nullable=False, max_length=3000)
 
-    unit: "Unit" = Relationship(back_populates="inventions")
+    unit: "Unit" = Relationship(back_populates="laboratories")
     user: "User" = Relationship(back_populates="laboratory")
