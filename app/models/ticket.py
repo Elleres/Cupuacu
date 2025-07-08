@@ -13,7 +13,7 @@ class Ticket(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     id_user: UUID = Field(primary_key=True, foreign_key="user.id")
-    id_tecnologia_alvo: UUID = Field(primary_key=True) # Essa coluna é necessário fazer uma verificação na camada de aplicação
+    id_tecnologia_alvo: UUID = Field(nullable=True)
     nome_do_projeto: str = Field(nullable=False, max_length=255, unique=True)
     status: TicketStatusType = Field(nullable=False, max_length=255, default=TicketStatusType.open)
     criado_em: datetime = Field(nullable=False, default_factory=datetime.now)
