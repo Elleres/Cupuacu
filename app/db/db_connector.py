@@ -12,7 +12,7 @@ if ENVIRONMENT == "dev":
     DATABASE_URL = os.getenv("DATABASE_URL")
 elif ENVIRONMENT == "test":
     DATABASE_URL = os.getenv("DATABASE_URL_TEST")
-elif ENVIRONMENT == "production":
+elif ENVIRONMENT == "prod":
     DATABASE_URL = os.getenv("DATABASE_URL_PROD")
 else:
     raise ValueError(f"ENVIRONMENT {ENVIRONMENT} não reconhecido!")
