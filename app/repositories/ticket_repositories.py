@@ -23,9 +23,9 @@ async def create_ticket(
 async def get_ticket(
         db: AsyncSession,
         ticket_id: UUID,
+        user_id: UUID,
 ):
-    db_ticket = await db.get(Ticket, ticket_id)
-
+    db_ticket = await db.get(Ticket, ident={"id":ticket_id, "id_user": user_id})
     if not db_ticket:
         return None
 
