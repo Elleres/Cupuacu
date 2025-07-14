@@ -33,7 +33,7 @@ async def create_ticket_endpoint(
     return TicketResponse.model_validate(ticket)
 
 @router.get("/ticket")
-async def get_ticket_by_id(
+async def get_ticket_by_id_endpoint(
         ticket_id: UUID,
         db: AsyncSession = Depends(get_db)
 ):
