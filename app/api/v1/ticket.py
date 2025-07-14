@@ -33,11 +33,12 @@ async def create_ticket_endpoint(
     return TicketResponse.model_validate(ticket)
 
 @router.get("/ticket")
-async def get_ticket_by_id(
+async def get_ticket_by_id_endpoint(
         ticket_id: UUID,
+        user_id: UUID,
         db: AsyncSession = Depends(get_db)
 ):
-    ticket = await get_ticket(db, ticket_id)
+    ticket = await get_ticket(db, ticket_id, user_id)
 
     if not ticket:
         await instance_not_found("ticket")

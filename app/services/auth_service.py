@@ -29,7 +29,7 @@ async def create_acess_token(
 ):
     to_encode = data.copy()
     expire = datetime.now() + timedelta(minutes=ACESS_TOKEN_EXPIRATION_MINUTES)
-    to_encode.update({'exp': expire})
+    to_encode.update({'exp': expire.timestamp()})
     token = Token(
         access_token=jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM),
         token_type="Bearer"
