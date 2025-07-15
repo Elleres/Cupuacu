@@ -11,6 +11,7 @@ from api.v1.invention_owner import router as invention_owner_router
 from api.v1.inventor_invention import router as inventor_invention_router
 from api.v1.admin import router as admin_router
 from api.v1.chat import router as chat_router
+from api.v1.vitrine import router as vitrine_router
 
 
 router = APIRouter()
@@ -18,6 +19,7 @@ router = APIRouter()
 router.include_router(user_router)
 
 router.include_router(admin_router)
+router.include_router(vitrine_router)
 router.include_router(invention_router)
 router.include_router(inventor_router)
 router.include_router(unit_router)
