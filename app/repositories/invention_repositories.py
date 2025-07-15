@@ -1,8 +1,12 @@
 from uuid import UUID
 
+from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from models.invention import Invention
+from models.invention_owner import InventionOwner
+from models.inventor_invention import InventorInvention
 from schemas.invention import InventionCreate
 
 
@@ -45,3 +49,16 @@ async def delete_invention(
     await db.commit()
 
     return 1
+
+async def get_inventions(
+        db: AsyncSession,
+        start: int,
+        limit: int,
+):
+    stmt = select(Invention).options(
+        selectinload(Invention.unit),
+        selectinload(Invention.inventors).selectinload(InventorInvention.inventor),
+        selectinload(Invention.owners).selectinload(InventionOwner.owner),
+    ).offset(start).limit(limit)
+    result = await db.execute(stmt)
+    return result.scalars().all()
