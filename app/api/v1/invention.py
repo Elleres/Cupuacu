@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, UploadFile, File, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.status import HTTP_204_NO_CONTENT
@@ -11,10 +11,12 @@ from schemas.invention import InventionResponse, InventionCreate
 from repositories.invention_repositories import create_invention, get_invention, delete_invention
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
+from services.storage import upload_object, delete_object
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
 
 router = APIRouter(tags=["CRUD - invention"])
 
+BUCKET_NAME = "user-images"
 
 @router.post("/invention", response_model=None)
 async def create_invention_endpoint(
@@ -83,3 +85,25 @@ async def delete_invention_endpoint(
 
     if resultado == 1:
         return Response(status_code=HTTP_204_NO_CONTENT)
+
+@router.post("/invention/image")
+async def upload_invention_image(
+        file: UploadFile = File(...),
+):
+    content = await file.read()
+
+    try:
+        await upload_object(BUCKET_NAME, file.filename, content, file.content_type)
+        url = f"http://localhost:9000/{BUCKET_NAME}/{file.filename}"
+        return {"url": url}
+    except IntegrityError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/invention/image")
+async def delete_invention_image(
+        invention_id: str,
+):
+    try:
+        await delete_object(BUCKET_NAME, str(invention_id))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
