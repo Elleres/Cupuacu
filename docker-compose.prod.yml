@@ -42,7 +42,36 @@ services:
       - mongodb_data:/data/db
     expose:
       - "27017"
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: always
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    env_file:
+      - .env
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5;
+        mc alias set local http://minio:9000 ${MINIO_LOGIN} ${MINIO_PASSWORD} &&
+        mc mb local/user-images &&
+        mc anonymous set download local/user-images;
+      "
 
 volumes:
   postgres_data:
   mongodb_data:
+  minio-data:
