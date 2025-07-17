@@ -1,26 +1,23 @@
-import os
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, Depends, Response, UploadFile, File, Form
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.status import HTTP_204_NO_CONTENT
 
+from const.const import BUCKET_NAME
 from const.enum import UserType
 from db.db_connector import get_db
 from schemas.invention import InventionResponse, InventionCreate
 from repositories.invention_repositories import create_invention, get_invention, delete_invention
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
-from services.storage import upload_object, delete_object, list_objects_with_prefix
-from utils.exceptions import integrity_error_database, unauthorized, instance_not_found, exceeded_limit_size
-from utils.regex_utils import get_file_extension
+from services.invention_image import upload_invention_image_logic
+from utils.storage import delete_object, list_objects_with_prefix
+from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
 
 router = APIRouter(tags=["CRUD - invention"])
 
-BUCKET_NAME = "user-images"
-MAX_IMAGE_PER_INVENTION = 10
-MINIO_URL = os.getenv("MINIO_URL")
 
 @router.post("/invention", response_model=None)
 async def create_invention_endpoint(
@@ -91,7 +88,7 @@ async def delete_invention_endpoint(
         return Response(status_code=HTTP_204_NO_CONTENT)
 
 @router.post("/invention/image")
-async def upload_invention_image(
+async def upload_invention_image_endpoint(
         invention_id: UUID = Form(...),
         file: UploadFile = File(...),
         current_user: UserResponse = Depends(get_current_user),
@@ -99,25 +96,8 @@ async def upload_invention_image(
 ):
     if current_user.type != UserType.admin:
         await unauthorized()
-
-    invention_db = await get_invention(db, invention_id)
-    if not invention_db:
-        await instance_not_found("invention")
-
-    content = await file.read()
-    formato = get_file_extension(file.filename)
-
-    curr_objects = await list_objects_with_prefix(BUCKET_NAME, str(invention_id))
-    indice_imagem = len(curr_objects) + 1
-
-    minio_file_name = f"{invention_id}_{indice_imagem}.{formato}"
-
-    if indice_imagem > MAX_IMAGE_PER_INVENTION:
-        await exceeded_limit_size(MAX_IMAGE_PER_INVENTION)
-
-    await upload_object(BUCKET_NAME, minio_file_name, content, file.content_type)
-
-    return {"url": f"{MINIO_URL}/{BUCKET_NAME}/{minio_file_name}"}
+    result = await upload_invention_image_logic(db, invention_id, file)
+    return {"url": result}
 
 
 @router.get("/invention/image", tags=["vitrine"])
@@ -129,7 +109,7 @@ async def get_invention_image(
     return objetos
 
 @router.delete("/invention/image", status_code=HTTP_204_NO_CONTENT)
-async def delete_invention_image(
+async def delete_invention_image_endpoint(
         file_name: str,
         current_user: UserResponse = Depends(get_current_user),
 ):

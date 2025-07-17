@@ -1,10 +1,6 @@
-import json
-from argparse import Action
-from datetime import datetime
 from uuid import UUID
 
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Query, HTTPException
-from typing import Optional
 
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +10,7 @@ from repositories.ticket_repositories import get_ticket
 from const.enum import UserType
 from db.db_connector import get_db
 from services.auth_service import get_current_user
-from services.chat_manager import chat_manager
+from utils.chat_manager import chat_manager
 
 router = APIRouter()
 
