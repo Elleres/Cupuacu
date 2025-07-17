@@ -61,3 +61,12 @@ async def unauthorized():
             "loc": "User type"
         }
     )
+
+async def exceeded_limit_size(n: int):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail={
+            "msg": f"Limit size of {n} exceeded",
+            "loc": "file",
+        }
+    )
