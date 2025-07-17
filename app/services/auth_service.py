@@ -9,17 +9,14 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from const.const import ROOT_PATH_URL, ACESS_TOKEN_EXPIRATION_MINUTES, ALGORITHM, SECRET_KEY
 from db.db_connector import DatabaseConnector, get_db
 from repositories.user_repositories import get_user_by_email, get_user_by_username
 from schemas.token import TokenData, Token
 from schemas.user import UserLogin, UserResponse
 from utils.exceptions import instance_not_found, invalid_login
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'dev_example')
-ALGORITHM = os.getenv('ALGORITHM', 'HS256') # HS256 should be changed in future
-ACESS_TOKEN_EXPIRATION_MINUTES = 60
 
-ROOT_PATH_URL = os.getenv('ROOT_PATH_URL', "")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=ROOT_PATH_URL + "/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
