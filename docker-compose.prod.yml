@@ -4,15 +4,17 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "7000:8000"
     depends_on:
       - db
       - mongodb
     env_file:
       - .env
     environment:
-      ENVIRONMENT: production
-      DATABASE_URL: ${DATABASE_URL}
+      ENVIRONMENT: prod
+      DATABASE_URL: ${DATABASE_URL_PROD}
+    volumes:
+      - ./app:/app
     restart: always
 
   db:
@@ -75,3 +77,4 @@ volumes:
   postgres_data:
   mongodb_data:
   minio-data:
+  app:
