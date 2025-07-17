@@ -1,6 +1,7 @@
+import os
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Response, UploadFile, File, HTTPException, Form
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.status import HTTP_204_NO_CONTENT
@@ -11,12 +12,15 @@ from schemas.invention import InventionResponse, InventionCreate
 from repositories.invention_repositories import create_invention, get_invention, delete_invention
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
-from services.storage import upload_object, delete_object
-from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
+from services.storage import upload_object, delete_object, list_objects_with_prefix
+from utils.exceptions import integrity_error_database, unauthorized, instance_not_found, exceeded_limit_size
+from utils.regex_utils import get_file_extension
 
 router = APIRouter(tags=["CRUD - invention"])
 
 BUCKET_NAME = "user-images"
+MAX_IMAGE_PER_INVENTION = 10
+MINIO_URL = os.getenv("MINIO_URL")
 
 @router.post("/invention", response_model=None)
 async def create_invention_endpoint(
@@ -88,22 +92,51 @@ async def delete_invention_endpoint(
 
 @router.post("/invention/image")
 async def upload_invention_image(
+        invention_id: UUID = Form(...),
         file: UploadFile = File(...),
+        current_user: UserResponse = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
 ):
+    if current_user.type != UserType.admin:
+        await unauthorized()
+
+    invention_db = await get_invention(db, invention_id)
+    if not invention_db:
+        await instance_not_found("invention")
+
     content = await file.read()
+    formato = get_file_extension(file.filename)
 
-    try:
-        await upload_object(BUCKET_NAME, file.filename, content, file.content_type)
-        url = f"http://localhost:9000/{BUCKET_NAME}/{file.filename}"
-        return {"url": url}
-    except IntegrityError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    curr_objects = await list_objects_with_prefix(BUCKET_NAME, str(invention_id))
+    indice_imagem = len(curr_objects) + 1
 
-@router.delete("/invention/image")
-async def delete_invention_image(
-        invention_id: str,
+    minio_file_name = f"{invention_id}_{indice_imagem}.{formato}"
+
+    if indice_imagem > MAX_IMAGE_PER_INVENTION:
+        await exceeded_limit_size(MAX_IMAGE_PER_INVENTION)
+
+    await upload_object(BUCKET_NAME, minio_file_name, content, file.content_type)
+
+    return {"url": f"{MINIO_URL}/{BUCKET_NAME}/{minio_file_name}"}
+
+
+@router.get("/invention/image", tags=["vitrine"])
+async def get_invention_image(
+        invention_id: UUID,
 ):
-    try:
-        await delete_object(BUCKET_NAME, str(invention_id))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    objetos = await list_objects_with_prefix(BUCKET_NAME, str(invention_id))
+
+    return objetos
+
+@router.delete("/invention/image", status_code=HTTP_204_NO_CONTENT)
+async def delete_invention_image(
+        file_name: str,
+        current_user: UserResponse = Depends(get_current_user),
+):
+    if current_user.type != UserType.admin:
+        await unauthorized()
+
+    result = await delete_object(BUCKET_NAME, str(file_name))
+
+    if not result["success"]:
+        await instance_not_found("file_name")

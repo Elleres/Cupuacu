@@ -4,7 +4,6 @@ import boto3
 from botocore.config import Config
 
 
-MINIO_URL = os.getenv('MINIO_URL')
 MINIO_LOGIN = os.getenv('MINIO_LOGIN')
 MINIO_PASSWORD = os.getenv('MINIO_PASSWORD')
 
@@ -23,4 +22,25 @@ async def upload_object(bucket: str, key:str ,body: bytes, content_type: str):
 
 
 async def delete_object(bucket: str, key: str):
+    try:
+        s3_client.head_object(Bucket=bucket, Key=key)
+
         s3_client.delete_object(Bucket=bucket, Key=key)
+        return {
+            "success": True,
+            "status": f"deleted",
+        }
+    except s3_client.exceptions.ClientError as _:
+        return {
+            "success": False,
+            "status": f"not found"
+        }
+
+async def list_objects_with_prefix(bucket: str, prefix: str):
+    response = s3_client.list_objects_v2(
+        Bucket=bucket,
+        Prefix=prefix
+    )
+
+    contents = response.get("Contents", [])
+    return [obj["Key"] for obj in contents]
