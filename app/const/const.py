@@ -1,0 +1,16 @@
+import os
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
+
+MAX_IMAGE_PER_INVENTION = 10
+BUCKET_NAME = "user-images"
+MINIO_URL = os.getenv("MINIO_URL")
+
+# Security encryption
+SECRET_KEY = os.getenv('SECRET_KEY', 'dev_example')
+ALGORITHM = os.getenv('ALGORITHM', 'HS256') # HS256 should be changed in future
+ACESS_TOKEN_EXPIRATION_MINUTES = 60
+
+ROOT_PATH_URL = os.getenv('ROOT_PATH_URL', "")
+
+MONGO_URL = os.environ.get("MONGO_URL")

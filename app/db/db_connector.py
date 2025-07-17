@@ -6,7 +6,7 @@ from sqlmodel import SQLModel
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # default = development
+from const.const import ENVIRONMENT
 
 if ENVIRONMENT == "dev":
     DATABASE_URL = os.getenv("DATABASE_URL")
