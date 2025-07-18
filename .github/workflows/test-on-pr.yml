@@ -1,7 +1,7 @@
-name: Test on Merge to Main
+name: Test on PR to Main
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
