@@ -1,21 +1,11 @@
-import os
-
 from contextlib import asynccontextmanager
 
 from sqlmodel import SQLModel
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from const.const import ENVIRONMENT
+from const.const import DATABASE_URL
 
-if ENVIRONMENT == "dev":
-    DATABASE_URL = os.getenv("DATABASE_URL")
-elif ENVIRONMENT == "test":
-    DATABASE_URL = os.getenv("DATABASE_URL_TEST")
-elif ENVIRONMENT == "prod":
-    DATABASE_URL = os.getenv("DATABASE_URL_PROD")
-else:
-    raise ValueError(f"ENVIRONMENT {ENVIRONMENT} não reconhecido!")
 
 class DatabaseConnector:
     def __init__(self, db_url: str):
