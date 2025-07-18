@@ -10,6 +10,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
+from const.const import DATABASE_URL_ALEMBIC
+
 config = context.config
 
 if config.config_file_name is not None:
@@ -28,14 +30,10 @@ for model_file in models_path.glob("*.py"):
 
 target_metadata = SQLModel.metadata
 
-load_dotenv()
-url = os.getenv("DATABASE_URL_ALEMBIC")
-if not url:
-    raise Exception("Variável DATABASE_URL_ALEMBIC não encontrada!")
 
 def run_migrations_offline() -> None:
     context.configure(
-        url=url,
+        url=DATABASE_URL_ALEMBIC,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -48,7 +46,7 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        url=url,
+        url=DATABASE_URL_ALEMBIC,
     )
     with connectable.connect() as connection:
         context.configure(
