@@ -1,16 +1,11 @@
-import os
-
 import boto3
 from botocore.config import Config
 
-
-MINIO_LOGIN = os.getenv('MINIO_LOGIN')
-MINIO_PASSWORD = os.getenv('MINIO_PASSWORD')
-
+from const.const import MINIO_LOGIN, MINIO_PASSWORD, MINIO_CONTAINER_URL
 
 s3_client = boto3.client(
     "s3",
-    endpoint_url="http://minio:9000",
+    endpoint_url=MINIO_CONTAINER_URL,
     aws_access_key_id=MINIO_LOGIN,
     aws_secret_access_key=MINIO_PASSWORD,
     config=Config(signature_version="s3v4"),
