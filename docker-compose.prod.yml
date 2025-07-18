@@ -12,7 +12,7 @@ services:
       - .env
     environment:
       ENVIRONMENT: prod
-      DATABASE_URL: ${DATABASE_URL_PROD}
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./app:/app
     restart: always
@@ -22,10 +22,6 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     expose:

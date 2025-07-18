@@ -1,0 +1,62 @@
+services:
+  test-db:
+    image: postgres:15-alpine
+    env_file:
+      - .test.env
+    volumes:
+      - test_pg_data:/var/lib/postgresql/data
+
+  test-mongodb:
+    image: mongo:latest
+    env_file:
+      - .test.env
+    volumes:
+      - test_mongo_data:/data/db
+
+  test-minio:
+    image: quay.io/minio/minio
+    container_name: test-minio
+    env_file:
+      - .test.env
+    environment:
+      MINIO_ROOT_USER: testadmin
+      MINIO_ROOT_PASSWORD: testadmin123
+    volumes:
+      - test-minio_data:/data
+    command: server /data --console-address ":9001"
+
+
+  test-minio_init:
+    image: minio/mc
+    depends_on:
+      - test-minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 10;
+        mc alias set local http://test-minio:9000 testadmin testadmin123 &&
+        mc mb local/user-images &&
+        mc anonymous set download local/user-images;
+        tail -f /dev/null
+      "
+
+  test-api:
+    build:
+      context: .
+      dockerfile: test.Dockerfile
+    volumes:
+      - ./app:/app
+      - ./tests:/tests
+    depends_on:
+      - test-db
+      - test-mongodb
+      - test-minio
+      - test-minio_init
+    env_file:
+      - .test.env
+    ports:
+      - "8001:8000"
+
+volumes:
+  test_pg_data:
+  test_mongo_data:
+  test-minio_data:
