@@ -17,7 +17,7 @@ pipeline {
             sh '''
             whoami
             pwd
-            touch /opt/Cupuacu/teste_de_permissao.txt && echo "Arquivo criado com sucesso" || echo "Falha ao criar arquivo"
+            mkdir /opt/Cupuacu/tmp && echo "Arquivo criado com sucesso" || echo "Falha ao criar arquivo"
             ls -l /opt/Cupuacu/teste_de_permissao.txt
             '''
           }
