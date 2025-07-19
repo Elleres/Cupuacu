@@ -14,9 +14,7 @@ pipeline {
 
         stage('Run docker-compose tests') {
             when {
-                not {
-                    branch 'main'
-                }
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 sh '''
@@ -27,9 +25,7 @@ pipeline {
 
         stage('Tear down containers') {
             when {
-                not {
-                    branch 'main'
-                }
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 sh '''
@@ -40,9 +36,7 @@ pipeline {
 
         stage('Clean up Docker') {
             when {
-                not {
-                    branch 'main'
-                }
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 sh 'docker image prune -f'
