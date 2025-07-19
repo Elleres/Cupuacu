@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = '/home/rb34/projetos/Cupuacu'
+        PROJECT_DIR = '/opt/Cupuacu'
     }
 
     stages {
