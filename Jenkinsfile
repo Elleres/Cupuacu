@@ -23,14 +23,13 @@ pipeline {
                 '''
             }
         }
-    }
 
         stage('Clean up Docker') {
             steps {
                 sh 'docker image prune -f'
             }
         }
-
+    }
 
     post {
         always {
