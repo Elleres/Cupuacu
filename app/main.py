@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
@@ -30,5 +31,6 @@ app.add_middleware(
 )
 app.include_router(router)
 
-asyncio.create_task(create_initial_admin_acc())
+if os.getenv("ENVIRONMENT") != "test":
+    asyncio.create_task(create_initial_admin_acc())
 
