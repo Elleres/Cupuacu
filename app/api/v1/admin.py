@@ -1,14 +1,17 @@
+from typing import Union, List
+from uuid import UUID
 
 from fastapi import APIRouter
-from fastapi.params import Depends
+from fastapi.params import Depends, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from const.enum import UserType, UserStatusType
+from const.enum import UserType, UserStatusType, TicketStatusType
 from db.db_connector import get_db
 from repositories.laboratory_repositories import create_laboratory
+from repositories.ticket_repositories import get_tickets
 from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
-from schemas.ticket import TicketSearchParams
+from schemas.ticket import TicketResponse
 from schemas.user import  UserResponse, UserCreateAdmin
 
 from repositories.user_repositories import create_user
@@ -58,10 +61,18 @@ async def create_laboratory_endpoint(
 
 @router.get("/tickets")
 async def get_all_tickets_endpoint(
-        params: TicketSearchParams,
+        start: int = 0,
+        limit: int = 20,
+        id_tecnologia_alvo: Union[UUID | None] = None,
+        status: Union[List[TicketStatusType] | None] = Query(None),
         current_user: UserResponse = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     if current_user.type != UserType.admin:
         await unauthorized()
 
+    result = await get_tickets(db, status, id_tecnologia_alvo, start, limit)
+
+    result = [TicketResponse.model_validate(x) for x in result]
+
+    return result
