@@ -31,6 +31,7 @@ app.add_middleware(
 )
 app.include_router(router)
 
+# Não criar conta adm inicial em ambiente de teste
 if os.getenv("ENVIRONMENT") != "test":
     asyncio.create_task(create_initial_admin_acc())
 
