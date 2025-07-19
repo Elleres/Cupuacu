@@ -18,11 +18,23 @@ router = APIRouter(tags=["CRUD - ticket"])
 
 @router.post("/ticket", response_model=None)
 async def create_ticket_endpoint(
-        ticket: TicketCreateRequest,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    ticket: TicketCreateRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
-    ticket = TicketCreate(**{"id_user": current_user.id,**ticket.model_dump()})
+    """
+    Cria um novo ticket associado ao usuário autenticado.
+
+    **Parameters**:
+    - `ticket (TicketCreateRequest)`: Dados do ticket a ser criado.
+
+    **Returns**:
+    - `TicketResponse`: Objeto contendo os dados do ticket criado.
+
+    **Raises**:
+    - `HTTPException` com status 400 caso ocorra erro de integridade no banco de dados.
+    """
+    ticket = TicketCreate(**{"id_user": current_user.id, **ticket.model_dump()})
     try:
         ticket = await create_ticket(db, ticket)
     except IntegrityError as e:
@@ -30,11 +42,24 @@ async def create_ticket_endpoint(
 
     return TicketResponse.model_validate(ticket)
 
+
 @router.get("/ticket")
 async def get_ticket_by_id_endpoint(
-        ticket_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    ticket_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Busca um ticket pelo seu ID.
+
+    **Parameters**:
+    - `ticket_id (UUID)`: ID do ticket a ser buscado.
+
+    **Returns**:
+    - `TicketResponse`: Objeto contendo os dados do ticket encontrado.
+
+    **Raises**:
+    - `HTTPException` com status 404 caso o ticket não seja encontrado.
+    """
     ticket = await get_ticket(db, ticket_id)
 
     if not ticket:
@@ -42,12 +67,28 @@ async def get_ticket_by_id_endpoint(
 
     return TicketResponse.model_validate(ticket)
 
+
 @router.delete("/ticket")
 async def delete_ticket_endpoint(
-        ticket_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    ticket_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Remove um ticket pelo seu ID.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `ticket_id (UUID)`: ID do ticket a ser removido.
+
+    **Returns**:
+    - `204 No Content`: Em caso de sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para deletar.
+    - `HTTPException` com status 404 caso o ticket não seja encontrado.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 

@@ -22,9 +22,13 @@ async def create_inventor_invention(
 
 async def get_inventor_invention(
         db: AsyncSession,
-        inventor_invention_id: UUID,
+        inventor_id: UUID,
+        invention_id: UUID
 ):
-    db_inventor_invention = await db.get(InventorInvention, inventor_invention_id)
+    db_inventor_invention = await db.get(InventorInvention, entity={
+        "id_inventor": inventor_id,
+        "id_invention": invention_id
+    })
 
     if not db_inventor_invention:
         return None
@@ -34,9 +38,13 @@ async def get_inventor_invention(
 
 async def delete_inventor_invention(
         db: AsyncSession,
-        inventor_invention_id: UUID
+        inventor_id: UUID,
+        invention_id: UUID
 ):
-    db_inventor_invention = await db.get(InventorInvention, inventor_invention_id)
+    db_inventor_invention = await db.get(InventorInvention, entity={
+        "id_inventor": inventor_id,
+        "id_invention": invention_id
+    })
 
     if not db_inventor_invention:
         return None

@@ -18,10 +18,25 @@ router = APIRouter(tags=["CRUD - laboratory"])
 
 @router.post("/laboratory", response_model=None)
 async def create_laboratory_endpoint(
-        laboratory: LaboratoryCreate,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    laboratory: LaboratoryCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Cria um novo laboratório no sistema.
+
+    **Requer permissões de administrador ou gerente de laboratório**
+
+    **Parameters**:
+    - `laboratory (LaboratoryCreate)`: Dados do laboratório a ser criado.
+
+    **Returns**:
+    - `LaboratoryResponse`: Objeto contendo os dados do laboratório criado.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 400 caso ocorra erro de integridade no banco de dados.
+    """
     if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
         await unauthorized()
 
@@ -32,11 +47,24 @@ async def create_laboratory_endpoint(
 
     return LaboratoryResponse.model_validate(laboratory)
 
+
 @router.get("/laboratory")
 async def get_laboratory_by_id(
-        laboratory_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    laboratory_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Busca um laboratório pelo seu ID.
+
+    **Parameters**:
+    - `laboratory_id (UUID)`: ID do laboratório a ser buscado.
+
+    **Returns**:
+    - `LaboratoryResponse`: Objeto contendo os dados do laboratório encontrado.
+
+    **Raises**:
+    - `HTTPException` com status 404 caso o laboratório não seja encontrado.
+    """
     laboratory = await get_laboratory(db, laboratory_id)
 
     if not laboratory:
@@ -44,12 +72,28 @@ async def get_laboratory_by_id(
 
     return LaboratoryResponse.model_validate(laboratory)
 
+
 @router.delete("/laboratory")
 async def delete_laboratory_endpoint(
-        laboratory_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    laboratory_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Remove um laboratório do sistema pelo seu ID.
+
+    **Requer permissões de administrador ou gerente de laboratório**
+
+    **Parameters**:
+    - `laboratory_id (UUID)`: ID do laboratório a ser removido.
+
+    **Returns**:
+    - `204 No Content`: Em caso de sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 404 caso o laboratório não seja encontrado.
+    """
     if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
         await unauthorized()
 

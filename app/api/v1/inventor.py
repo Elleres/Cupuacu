@@ -18,24 +18,25 @@ router = APIRouter(tags=["CRUD - inventor"])
 
 @router.post("/inventor", response_model=None)
 async def create_inventor_endpoint(
-        inventor: InventorCreate,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    inventor: InventorCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Processa a requisição para criar um novo usuário.
+    Cria um novo inventor no sistema.
 
-    **Parâmetros:**
-    - `inventor`: Objeto InventorCreate contendo os dados de um novo inventor (nome, email)
+    **Requer permissões de administrador**
 
-    **Retorna:**
-    - `InventorResponse`: Objeto contendo os dados do invetor criado.
+    **Parameters**:
+    - `inventor (InventorCreate)`: Dados do inventor (nome, e-mail).
 
-    **Levanta:**
-    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a criação. Somente admins podem
-    criar um inventor.
+    **Returns**:
+    - `InventorResponse`: Objeto contendo os dados do inventor criado.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para criar inventores.
+    - `HTTPException` com status 400 caso ocorra um erro de integridade no banco de dados.
     """
-    # Somente admins podem criar inventor
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -46,20 +47,23 @@ async def create_inventor_endpoint(
 
     return InventorResponse.model_validate(inventor)
 
+
 @router.get("/inventor")
 async def get_inventor_by_id(
-        inventor_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    inventor_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Busca o a invenção pelo ID
+    Busca um inventor pelo seu ID.
 
-    **Parâmetros**
-    - inventor_id: ID do inventor que será utilizado para buscar no banco.
+    **Parameters**:
+    - `inventor_id (UUID)`: ID do inventor a ser buscado.
 
-    **Retorna**
-    - `InventorResponse`: Objeto contendo os dados do inventor achado.
+    **Returns**:
+    - `InventorResponse`: Objeto contendo os dados do inventor encontrado.
 
+    **Raises**:
+    - `HTTPException` com status 404 caso o inventor não seja encontrado.
     """
     inventor = await get_inventor(db, inventor_id)
 
@@ -68,12 +72,28 @@ async def get_inventor_by_id(
 
     return InventorResponse.model_validate(inventor)
 
+
 @router.delete("/inventor")
 async def delete_inventor_endpoint(
-        inventor_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    inventor_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Remove um inventor do sistema a partir do seu ID.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `inventor_id (UUID)`: ID do inventor a ser removido.
+
+    **Returns**:
+    - `204 No Content`: Em caso de sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para deletar inventores.
+    - `HTTPException` com status 404 caso o inventor não seja encontrado.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 

@@ -22,9 +22,13 @@ async def create_invention_owner(
 
 async def get_invention_owner(
         db: AsyncSession,
-        invention_owner_id: UUID,
+        id_invention: UUID,
+        id_owner: UUID
 ):
-    db_invention_owner = await db.get(InventionOwner, invention_owner_id)
+    db_invention_owner = await db.get(InventionOwner, {
+        "id_invention": id_invention,
+        "id_owner": id_owner,
+    })
 
     if not db_invention_owner:
         return None
@@ -34,9 +38,13 @@ async def get_invention_owner(
 
 async def delete_invention_owner(
         db: AsyncSession,
-        invention_owner_id: UUID
+        id_invention: UUID,
+        id_owner: UUID
 ):
-    db_invention_owner = await db.get(InventionOwner, invention_owner_id)
+    db_invention_owner = await db.get(InventionOwner, {
+        "id_invention": id_invention,
+        "id_owner": id_owner,
+    })
 
     if not db_invention_owner:
         return None

@@ -18,10 +18,25 @@ router = APIRouter(tags=["CRUD - owner"])
 
 @router.post("/owner", response_model=None)
 async def create_owner_endpoint(
-        owner: OwnerCreate,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    owner: OwnerCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Cria um novo proprietário no sistema.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `owner (OwnerCreate)`: Dados do proprietário a ser criado.
+
+    **Returns**:
+    - `OwnerResponse`: Objeto contendo os dados do proprietário criado.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para criar.
+    - `HTTPException` com status 400 caso ocorra erro de integridade no banco de dados.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -32,11 +47,24 @@ async def create_owner_endpoint(
 
     return OwnerResponse.model_validate(owner)
 
+
 @router.get("/owner")
 async def get_owner_by_id(
-        owner_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    owner_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Busca um proprietário pelo seu ID.
+
+    **Parameters**:
+    - `owner_id (UUID)`: ID do proprietário a ser buscado.
+
+    **Returns**:
+    - `OwnerResponse`: Objeto contendo os dados do proprietário encontrado.
+
+    **Raises**:
+    - `HTTPException` com status 404 caso o proprietário não seja encontrado.
+    """
     owner = await get_owner(db, owner_id)
 
     if not owner:
@@ -44,12 +72,28 @@ async def get_owner_by_id(
 
     return OwnerResponse.model_validate(owner)
 
+
 @router.delete("/owner")
 async def delete_owner_endpoint(
-        owner_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    owner_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Remove um proprietário do sistema pelo seu ID.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `owner_id (UUID)`: ID do proprietário a ser removido.
+
+    **Returns**:
+    - `204 No Content`: Em caso de sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para deletar.
+    - `HTTPException` com status 404 caso o proprietário não seja encontrado.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 

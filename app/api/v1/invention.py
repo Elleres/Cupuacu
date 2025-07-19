@@ -21,23 +21,25 @@ router = APIRouter(tags=["CRUD - invention"])
 
 @router.post("/invention", response_model=None)
 async def create_invention_endpoint(
-        invention: InventionCreate,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    invention: InventionCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Processa a requisição para criar um novo usuário.
+    Cria uma nova invenção no sistema.
 
-    **Parâmetros:**
-    - `invention`: Objeto InventionCreate contendo os dados de uma nova invenção (titulo, descricao, situacao, trl, type, data_submissao)
+    **Requer permissões de administrador**
 
-    **Retorna:**
-    - `InventionResponse`: Objeto contendo os dados da invenção criada.
+    **Parameters**:
+    - `invention (InventionCreate)`: Dados da invenção (título, descrição, situação, TRL, tipo, data de submissão).
 
-    **Levanta:**
-    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a criação.
+    **Returns**:
+    - `InventionResponse`: Dados da invenção criada.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 400 caso ocorra um erro de integridade no banco de dados.
     """
-    # Somente admins podem criar invenções
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -48,20 +50,23 @@ async def create_invention_endpoint(
 
     return InventionResponse.model_validate(invention)
 
+
 @router.get("/invention")
 async def get_invention_by_id(
-        invention_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    invention_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Busca o a invenção pelo ID
+    Busca uma invenção pelo seu ID.
 
-    **Parâmetros**
-    - invention_id: ID do objetivo invention que será utilizado para buscar no banco.
+    **Parameters**:
+    - `invention_id (UUID)`: ID da invenção.
 
-    **Retorna**
-    - `InventionResponse`: Objeto contendo os dados da invenção criada.
+    **Returns**:
+    - `InventionResponse`: Dados da invenção encontrada.
 
+    **Raises**:
+    - `HTTPException` com status 404 caso a invenção não seja encontrada.
     """
     invention = await get_invention(db, invention_id)
 
@@ -70,12 +75,28 @@ async def get_invention_by_id(
 
     return InventionResponse.model_validate(invention)
 
-@router.delete("/invention")
+
+@router.delete("/invention", status_code=HTTP_204_NO_CONTENT)
 async def delete_invention_endpoint(
-        invention_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    invention_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Deleta uma invenção pelo ID.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `invention_id (UUID)`: ID da invenção a ser deletada.
+
+    **Returns**:
+    - `204 No Content`: Se a invenção foi removida com sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 404 caso a invenção não seja encontrada.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -87,32 +108,74 @@ async def delete_invention_endpoint(
     if resultado == 1:
         return Response(status_code=HTTP_204_NO_CONTENT)
 
+
 @router.post("/invention/image")
 async def upload_invention_image_endpoint(
-        invention_id: UUID = Form(...),
-        file: UploadFile = File(...),
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    invention_id: UUID = Form(...),
+    file: UploadFile = File(...),
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Faz upload de uma imagem associada a uma invenção.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `invention_id (UUID)`: ID da invenção.
+    - `file (UploadFile)`: Arquivo de imagem a ser enviado.
+
+    **Returns**:
+    - `dict`: URL da imagem enviada.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 404 caso a invenção não seja encontrada.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
+
     result = await upload_invention_image_logic(db, invention_id, file)
     return {"url": result}
 
 
 @router.get("/invention/image", tags=["vitrine"])
 async def get_invention_image(
-        invention_id: UUID,
+    invention_id: UUID,
 ):
-    objetos = await list_objects_with_prefix(BUCKET_NAME, str(invention_id))
+    """
+    Lista as imagens associadas a uma invenção.
 
+    **Parameters**:
+    - `invention_id (UUID)`: ID da invenção.
+
+    **Returns**:
+    - `list[str]`: Lista de URLs das imagens encontradas.
+    """
+    objetos = await list_objects_with_prefix(BUCKET_NAME, str(invention_id))
     return objetos
+
 
 @router.delete("/invention/image", status_code=HTTP_204_NO_CONTENT)
 async def delete_invention_image_endpoint(
-        file_name: str,
-        current_user: UserResponse = Depends(get_current_user),
+    file_name: str,
+    current_user: UserResponse = Depends(get_current_user),
 ):
+    """
+    Remove uma imagem específica associada a uma invenção.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `file_name (str)`: Nome do arquivo a ser removido.
+
+    **Returns**:
+    - `204 No Content`: Se a imagem foi removida com sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão.
+    - `HTTPException` com status 404 caso o arquivo não seja encontrado.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 

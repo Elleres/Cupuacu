@@ -18,23 +18,24 @@ from services.auth_service import oauth2_scheme
 
 router = APIRouter(tags=["user"])
 
+
 @router.post("/users")
 async def create_user_endpoint(
-        user: UserCreate,
-        db: AsyncSession = Depends(get_db),
+    user: UserCreate,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Processa a requisição para criar um novo usuário.
 
-    **Parâmetros:**
-    - `user`: Objeto `UserCreate` contendo os dados do novo usuário (nome, email, username, password e type).
+    **Parameters**:
+    - `user (UserCreate)`: Dados do novo usuário (nome, email, username, password e type).
 
-    **Retorna:**
-    - `UserResponse`: Objeto contendo os dados do usuário criado, excluindo a senha.
+    **Returns**:
+    - `UserResponse`: Dados do usuário criado, excluindo a senha.
 
-    **Levanta:**
-    - `HTTPException` com status 400 se os dados violarem alguma restrição do banco de dados.
-    - `HTTPException` com status 500 para erros não documentados.
+    **Raises**:
+    - `HTTPException` com status 400 se os dados violarem restrições do banco.
+    - `HTTPException` com status 401 se tentar criar usuário do tipo admin.
     """
     hashed_password = await hash_password(user.password)
     user.password = hashed_password
@@ -50,48 +51,45 @@ async def create_user_endpoint(
     return UserResponse.model_validate(user)
 
 
-
 @router.post("/token", response_model=Token)
 async def create_token_endpoint(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        db: AsyncSession = Depends(get_db)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: AsyncSession = Depends(get_db),
 ):
     """
-    Processa a requisição para autenticar um usuário e gerar um token de acesso.
+    Autentica um usuário e gera um token de acesso JWT.
 
-    **Parâmetros:**
-    - `form_data`: Objeto `OAuth2PasswordRequestForm` contendo o nome de usuário e a senha.
-      Estes são esperados como dados de formulário (`application/x-www-form-urlencoded`).
+    **Parameters**:
+    - `form_data (OAuth2PasswordRequestForm)`: Dados de formulário com username e password.
 
-    **Retorna:**
-    - `Token`: Objeto contendo o `access_token` JWT e o `token_type` (geralmente "bearer").
+    **Returns**:
+    - `Token`: Contém `access_token` JWT e `token_type` (geralmente "bearer").
 
-    **Levanta:**
-    - `HTTPException` com status 401 se as credenciais (username/password) estiverem incorretas.
-    - `HTTPException` com status 404 se o username não estiver registrado no banco de dados.
+    **Raises**:
+    - `HTTPException` com status 401 se credenciais incorretas.
+    - `HTTPException` com status 404 se usuário não existir.
     """
     user_login = UserLogin(username=form_data.username, password=form_data.password)
     token = await authenticate_user(db, user_login)
     return token
 
+
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(
-        token: str = Depends(oauth2_scheme),
-        db: AsyncSession = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
 ):
     """
-    Recupera os detalhes do perfil do usuário atualmente autenticado.
+    Recupera os detalhes do perfil do usuário autenticado.
 
-    **Parâmetros:**
-    - `token`: Token de acesso JWT fornecido no cabeçalho `Authorization` (Bearer Token).
-      Este parâmetro é injetado automaticamente pelo `oauth2_scheme` e não precisa ser passado explicitamente pelo cliente (SE ESTIVER USANDO O SWAGGER).
+    **Parameters**:
+    - `token (str)`: Token JWT extraído do cabeçalho `Authorization` (Bearer Token).
 
-    **Retorna:**
-    - `UserResponse`: Um objeto contendo os detalhes do usuário autenticado.
+    **Returns**:
+    - `UserResponse`: Dados do usuário autenticado.
 
-    **Levanta:**
-    - `HTTPException` com status 401 (Não Autorizado) se o token for inválido, ausente ou expirado.
+    **Raises**:
+    - `HTTPException` com status 401 se o token for inválido, ausente ou expirado.
     """
     current_user = await get_current_user(db, token)
-
     return current_user
