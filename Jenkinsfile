@@ -5,11 +5,22 @@ pipeline {
         PROJECT_DIR = '/opt/Cupuacu'
     }
 
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
+        }
+        stage('Testar Permissão') {
+          steps {
+            sh '''
+            whoami
+            pwd
+            touch /opt/Cupuacu/teste_de_permissao.txt && echo "Arquivo criado com sucesso" || echo "Falha ao criar arquivo"
+            ls -l /opt/Cupuacu/teste_de_permissao.txt
+            '''
+          }
         }
 
         stage('Run docker-compose tests') {
