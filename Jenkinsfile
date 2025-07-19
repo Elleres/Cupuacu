@@ -15,7 +15,7 @@ pipeline {
         stage('Run docker-compose tests') {
             when {
                 not {
-                    branch 'main' // Só roda testes se NÃO for main
+                    branch 'main'
                 }
             }
             steps {
