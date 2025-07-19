@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from const.enum import UserType, UserStatusType, TicketStatusType
 from db.db_connector import get_db
@@ -21,12 +22,29 @@ from utils.exceptions import integrity_error_database, unauthorized
 router = APIRouter(prefix="/admin" ,tags=["admin"])
 
 
-@router.post("/users")
+@router.post(
+    "/users",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Create new user"
+)
 async def create_user_endpoint(
         user: UserCreateAdmin,
         db: AsyncSession = Depends(get_db),
         current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Create a new user as an administrator. This endpoint lets administrators create users directly with their status set to active,
+    bypassing any additional approval or activation steps.
+
+    Parameters:
+    - **user (UserCreateAdmin)**: The user information to create.
+    - **db (AsyncSession)**: Database session dependency.
+    - **current_user (UserResponse)**: The authenticated admin user performing the action.
+
+    Returns:
+    - **UserResponse**: The newly created user object.
+    """
     hashed_password = await hash_password(user.password)
     user.password = hashed_password
     user.status = UserStatusType.active
