@@ -13,13 +13,13 @@ from repositories.laboratory_repositories import create_laboratory
 from repositories.ticket_repositories import get_tickets
 from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
 from schemas.ticket import TicketResponse
-from schemas.user import  UserResponse, UserCreateAdmin
+from schemas.user import UserResponse, UserCreateAdmin
 
 from repositories.user_repositories import create_user
 from services.auth_service import hash_password, get_current_user
 from utils.exceptions import integrity_error_database, unauthorized
 
-router = APIRouter(prefix="/admin" ,tags=["admin"])
+router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.post(
@@ -29,21 +29,25 @@ router = APIRouter(prefix="/admin" ,tags=["admin"])
     summary="Create new user"
 )
 async def create_user_endpoint(
-        user: UserCreateAdmin,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    user: UserCreateAdmin,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """
-    Create a new user as an administrator. This endpoint lets administrators create users directly with their status set to active,
-    bypassing any additional approval or activation steps.
+    Cria um novo usuário, permitindo usar as permissões de administrador para alterar o status do usuário.
 
-    Parameters:
-    - **user (UserCreateAdmin)**: The user information to create.
-    - **db (AsyncSession)**: Database session dependency.
-    - **current_user (UserResponse)**: The authenticated admin user performing the action.
+    **Requer permissões de administrador**
 
-    Returns:
-    - **UserResponse**: The newly created user object.
+    **Parameters**:
+    - `user (UserCreateAdmin)`: Dados do usuário que será criado.
+
+    **Returns**:
+    - `UserResponse`: O recém criado usuário.
+
+    **Raises**:
+    - `HTTPException` com status 200 caso tudo ocorra corretamente.
+    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a criação.
+    - `HTTPException` com status 400 caso ocorra um erro de integridade no banco de dados.
     """
     hashed_password = await hash_password(user.password)
     user.password = hashed_password
@@ -60,13 +64,27 @@ async def create_user_endpoint(
     return UserResponse.model_validate(user)
 
 
-
 @router.post("/laboratory", response_model=None)
 async def create_laboratory_endpoint(
-        laboratory: LaboratoryCreateAdmin,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    laboratory: LaboratoryCreateAdmin,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Cria um novo laboratório no sistema.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `laboratory (LaboratoryCreateAdmin)`: Dados do laboratório a ser criado.
+
+    **Returns**:
+    - `LaboratoryResponse`: O laboratório recém criado.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a criação.
+    - `HTTPException` com status 400 caso ocorra um erro de integridade no banco de dados.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -77,20 +95,35 @@ async def create_laboratory_endpoint(
 
     return LaboratoryResponse.model_validate(laboratory)
 
+
 @router.get("/tickets")
 async def get_all_tickets_endpoint(
-        start: int = 0,
-        limit: int = 20,
-        id_tecnologia_alvo: Union[UUID | None] = None,
-        status: Union[List[TicketStatusType] | None] = Query(None),
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    start: int = 0,
+    limit: int = 20,
+    id_tecnologia_alvo: Union[UUID | None] = None,
+    status: Union[List[TicketStatusType] | None] = Query(None),
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
+    """
+    Lista os tickets com filtros opcionais por status e tecnologia alvo.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `start (int)`: Offset para paginação. Padrão: 0.
+    - `limit (int)`: Número máximo de resultados. Padrão: 20.
+    - `id_tecnologia_alvo (UUID | None)`: ID da tecnologia alvo (opcional).
+    - `status (List[TicketStatusType] | None)`: Lista de status dos tickets (opcional).
+
+    **Returns**:
+    - `List[TicketResponse]`: Lista de tickets filtrados.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a consulta.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 
     result = await get_tickets(db, status, id_tecnologia_alvo, start, limit)
-
-    result = [TicketResponse.model_validate(x) for x in result]
-
-    return result
+    return [TicketResponse.model_validate(x) for x in result]

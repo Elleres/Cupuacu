@@ -18,24 +18,25 @@ router = APIRouter(tags=["CRUD - unit"])
 
 @router.post("/unit", response_model=None)
 async def create_unit_endpoint(
-        unit: UnitCreate,
-        current_user: UserResponse = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    unit: UnitCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Processa a requisição para criar uma nova unidade.
+    Cria uma nova unidade no sistema.
 
-    **Parâmetros:**
-    - `unit`: Objeto UnitCreate contendo os dados de uma nova unidade (nome, sigla, tipo)
+    **Requer permissões de administrador**
 
-    **Retorna:**
+    **Parameters**:
+    - `unit (UnitCreate)`: Dados da unidade a ser criada (nome, sigla, tipo).
+
+    **Returns**:
     - `UnitResponse`: Objeto contendo os dados da unidade criada.
 
-    **Levanta:**
-    - `HTTPException` com status 401 caso o usuário não possua a permissão para fazer a criação. Somente admins podem
-    criar uma unidade.
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para criar (somente admins).
+    - `HTTPException` com status 400 em caso de erro de integridade no banco de dados.
     """
-    # Somente admins podem criar unidade
     if current_user.type != UserType.admin:
         await unauthorized()
 
@@ -46,19 +47,23 @@ async def create_unit_endpoint(
 
     return UnitResponse.model_validate(unit)
 
+
 @router.get("/unit")
 async def get_unit_by_id(
-        unit_id: UUID,
-        db: AsyncSession = Depends(get_db)
+    unit_id: UUID,
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Busca a unidade pelo ID
+    Busca uma unidade pelo seu ID.
 
-    **Parâmetros**
-    - unit_id: ID da unidade que será utilizado para buscar no banco.
+    **Parameters**:
+    - `unit_id (UUID)`: ID da unidade a ser buscada.
 
-    **Retorna**
-    - `UnitResponse`: Objeto contendo os dados da unidade achada.
+    **Returns**:
+    - `UnitResponse`: Objeto contendo os dados da unidade encontrada.
+
+    **Raises**:
+    - `HTTPException` com status 404 caso a unidade não seja encontrada.
     """
     unit = await get_unit(db, unit_id)
 
@@ -67,12 +72,28 @@ async def get_unit_by_id(
 
     return UnitResponse.model_validate(unit)
 
+
 @router.delete("/unit")
 async def delete_unit_endpoint(
-        unit_id: UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: UserResponse = Depends(get_current_user)
+    unit_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
 ):
+    """
+    Remove uma unidade pelo seu ID.
+
+    **Requer permissões de administrador**
+
+    **Parameters**:
+    - `unit_id (UUID)`: ID da unidade a ser removida.
+
+    **Returns**:
+    - `204 No Content`: Em caso de sucesso.
+
+    **Raises**:
+    - `HTTPException` com status 401 caso o usuário não possua permissão para deletar (somente admins).
+    - `HTTPException` com status 404 caso a unidade não seja encontrada.
+    """
     if current_user.type != UserType.admin:
         await unauthorized()
 
