@@ -22,8 +22,6 @@ async def create_ticket_endpoint(
         current_user: UserResponse = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    if current_user.type != UserType.admin:
-        await unauthorized()
     ticket = TicketCreate(**{"id_user": current_user.id,**ticket.model_dump()})
     try:
         ticket = await create_ticket(db, ticket)

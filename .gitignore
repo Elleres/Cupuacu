@@ -51,6 +51,7 @@ Thumbs.db
 *.pid
 *.pid.lock
 *.env
+.test.env
 docker-compose.override.yml
 
 # -----------------------------------------
