@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = '/opt/Cupuacu'
+        PROJECT_DIR = '/opt/jenkins/Cupuacu'
     }
 
 
@@ -11,16 +11,6 @@ pipeline {
             steps {
                 checkout scm
             }
-        }
-        stage('Testar Permissão') {
-          steps {
-            sh '''
-            whoami
-            pwd
-            mkdir /opt/Cupuacu/tmp && echo "Arquivo criado com sucesso" || echo "Falha ao criar arquivo"
-            ls -l /opt/Cupuacu/teste_de_permissao.txt
-            '''
-          }
         }
 
         stage('Run docker-compose tests') {
