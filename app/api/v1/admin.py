@@ -8,6 +8,7 @@ from const.enum import UserType, UserStatusType
 from db.db_connector import get_db
 from repositories.laboratory_repositories import create_laboratory
 from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
+from schemas.ticket import TicketSearchParams
 from schemas.user import  UserResponse, UserCreateAdmin
 
 from repositories.user_repositories import create_user
@@ -45,7 +46,7 @@ async def create_laboratory_endpoint(
         current_user: UserResponse = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    if current_user.type not in [UserType.admin, UserType.gerente_laboratorio]:
+    if current_user.type != UserType.admin:
         await unauthorized()
 
     try:
@@ -54,3 +55,13 @@ async def create_laboratory_endpoint(
         await integrity_error_database(e)
 
     return LaboratoryResponse.model_validate(laboratory)
+
+@router.get("/tickets")
+async def get_all_tickets_endpoint(
+        params: TicketSearchParams,
+        current_user: UserResponse = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if current_user.type != UserType.admin:
+        await unauthorized()
+

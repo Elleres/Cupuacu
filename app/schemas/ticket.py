@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional, List
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,3 +21,9 @@ class TicketResponse(TicketCreate):
     id: UUID = Field(..., example="a1b2c3d4-e5f6-7890-1234-567890abcdef")
 
     model_config = ConfigDict(from_attributes=True)
+
+class TicketSearchParams(BaseModel):
+    start: int = Field(default=0, ge=0)
+    limit: int = Field(default=20, ge=1)
+    id_tecnologia_alvo: Optional[UUID]
+    status: Optional[List[TicketStatusType]] = Field(None)
