@@ -44,3 +44,8 @@ async def delete_ticket(
     await db.commit()
 
     return 1
+
+async def get_tickets(
+        db: AsyncSession,
+):
+    pass
