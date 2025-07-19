@@ -55,10 +55,10 @@ pipeline {
                     git pull origin main
 
                     echo "Derrubando containers existentes..."
-                    docker compose down
+                    docker compose -f docker-compose.prod.yml down
 
                     echo "Subindo nova versão em segundo plano..."
-                    docker compose up -d
+                    docker compose -f docker-compose.prod.yml up -d
                     '''
                 }
             }
