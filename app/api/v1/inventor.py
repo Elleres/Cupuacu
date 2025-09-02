@@ -7,8 +7,8 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 from const.enum import UserType
 from db.db_connector import get_db
-from schemas.inventor import InventorResponse, InventorCreate
-from repositories.inventor_repositories import create_inventor, get_inventor, delete_inventor
+from schemas.inventor import InventorFilters, InventorResponse, InventorCreate
+from repositories.inventor_repositories import create_inventor, get_inventor, delete_inventor, get_inventors
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
@@ -104,3 +104,27 @@ async def delete_inventor_endpoint(
 
     if resultado == 1:
         return Response(status_code=HTTP_204_NO_CONTENT)
+
+@router.post("/inventors")
+async def get_inventors_endpoint(
+    inventor_filters: InventorFilters,   
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Lista os inventores disponíveis no banco de dados.
+
+    **Parameters**:
+    - `inventor_filters (InventorFilters)`: Schema contendo os filtros para busca.
+
+    **Returns**:
+    - `list`: Lista de dicionários contendo:
+      - `inventor (InventorResponse)`: Lista contendo as unidades pós filtros
+    """
+    inventors = await get_inventors(db, inventor_filters)
+
+    response = []
+    for inventor in inventors:
+        response.append(
+            InventorResponse.model_validate(inventor)
+        )
+    return response

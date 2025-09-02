@@ -1,9 +1,10 @@
 from uuid import UUID
 
+from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.inventor import Inventor
-from schemas.inventor import InventorCreate
+from schemas.inventor import InventorCreate, InventorFilters
 
 
 async def create_inventor(
@@ -45,3 +46,27 @@ async def delete_inventor(
     await db.commit()
 
     return 1
+
+
+async def get_inventors(
+        db: AsyncSession,
+        inventor_filters: InventorFilters
+):
+    FILTER_MAP = {
+        "inventor_id": Inventor.id,
+        "inventor_nome": Inventor.nome,
+        "inventor_email": Inventor.email
+    }
+
+    stmt = select(Inventor)
+
+    for field_name, column in FILTER_MAP.items():
+        value = getattr(inventor_filters, field_name)
+        if value is not None:
+            if isinstance(value, list):
+                stmt = stmt.where(column.in_(value))
+            else:
+                stmt = stmt.where(column == value)
+    result = await db.execute(stmt)
+
+    return result.scalars().all()

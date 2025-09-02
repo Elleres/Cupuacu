@@ -115,7 +115,7 @@ async def get_invencoes_vitrine_endpoint(
     Lista as unidades disponíveis no banco de dados.
 
     **Parameters**:
-    - `unit_filters (InventioFilters)`: Schema contendo os filtros para busca.
+    - `unit_filters (UnitFilters)`: Schema contendo os filtros para busca.
 
     **Returns**:
     - `list`: Lista de dicionários contendo:
