@@ -19,7 +19,7 @@ class Invention(SQLModel, table=True):
 
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    id_unity: UUID = Field(foreign_key="unit.id", nullable=False)
+    id_unit: UUID = Field(foreign_key="unit.id", nullable=False)
     titulo: str = Field(nullable=False, max_length=255)
     descricao: str = Field(nullable=False, max_length=2000)
     situacao: InventionStatusType = Field(nullable=False)

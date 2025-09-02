@@ -1,14 +1,16 @@
 from datetime import date
+from typing import Optional, List
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi import Query
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from const.enum import InventionType, InventionStatusType
+from const.enum import InventionType, InventionStatusType, UnitType
 
 
 class InventionCreate(BaseModel):
 
-    id_unity: UUID = Field(..., example="a1b2c3d4-e5f6-7890-1234-567890abcdef")
+    id_unit: UUID = Field(..., example="a1b2c3d4-e5f6-7890-1234-567890abcdef")
     titulo: str = Field(..., example="Cadeira de Rodas Infantil Acessível")
     descricao: str = Field(
         ...,
@@ -33,3 +35,24 @@ class InventionResponse(InventionCreate):
     id: UUID = Field(..., example="a1b2c3d4-e5f6-7890-1234-567890abcdef")
 
     model_config = ConfigDict(from_attributes=True)
+
+class InventionFilters(BaseModel):
+    start: int = 0
+    limit: int = 20
+    unit_id: Optional[UUID]
+    unit_name: Optional[List[str]]
+    unit_sigla: Optional[List[str]]
+    unit_tipo: Optional[List[UnitType]]
+    inv_titulo: Optional[str]
+    inv_situacao: Optional[List[InventionStatusType]]
+    inv_trl: Optional[List[int]]
+    inv_tipo: Optional[List[InventionType]]
+    inventor_name: Optional[List[str]]
+    owner_name: Optional[List[str]]
+
+    @field_validator("inv_trl")
+    def check_trl(cls, v):
+        for i in v:
+            if i < 1 or i > 9:
+                raise ValueError("inv_trl deve estar entre 1 e 9")
+        return v
