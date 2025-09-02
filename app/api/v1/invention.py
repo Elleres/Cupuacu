@@ -1,15 +1,18 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, UploadFile, File, Form
+from fastapi import APIRouter, Depends, Response, UploadFile, File, Form, Query
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
-from starlette.status import HTTP_204_NO_CONTENT
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
 
 from const.const import BUCKET_NAME
 from const.enum import UserType
 from db.db_connector import get_db
-from schemas.invention import InventionResponse, InventionCreate
-from repositories.invention_repositories import create_invention, get_invention, delete_invention
+from schemas.invention import InventionResponse, InventionCreate, InventionFilters
+from repositories.invention_repositories import create_invention, get_invention, delete_invention, get_inventions
+from schemas.inventor import InventorResponse
+from schemas.owner import OwnerResponse
+from schemas.unit import UnitResponse
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from services.invention_image import upload_invention_image_logic
@@ -19,7 +22,11 @@ from utils.exceptions import integrity_error_database, unauthorized, instance_no
 router = APIRouter(tags=["CRUD - invention"])
 
 
-@router.post("/invention", response_model=None)
+@router.post(
+    "/invention",
+    response_model=None,
+    status_code=HTTP_201_CREATED
+)
 async def create_invention_endpoint(
     invention: InventionCreate,
     current_user: UserResponse = Depends(get_current_user),
@@ -183,3 +190,35 @@ async def delete_invention_image_endpoint(
 
     if not result["success"]:
         await instance_not_found("file_name")
+
+@router.post("/inventions", tags=["vitrine"])
+async def get_invencoes_vitrine_endpoint(
+    invention_filters: InventionFilters,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Lista as invenções para exibição na vitrine, incluindo informações relacionadas.
+
+    **Parameters**:
+    - `invention_filters (InventioFilters)`: Schema contendo os filtros para busca.
+
+    **Returns**:
+    - `list`: Lista de dicionários contendo:
+      - `invention (InventionResponse)`: Dados da invenção.
+      - `unit (UnitResponse)`: Unidade associada à invenção.
+      - `inventors (list[InventorResponse])`: Lista de inventores relacionados.
+      - `owners (list[OwnerResponse])`: Lista de proprietários relacionados.
+    """
+    invencoes = await get_inventions(db, invention_filters)
+
+    response = []
+    for inv in invencoes:
+        response.append(
+            {
+                "invention": InventionResponse.model_validate(inv),
+                "unit": UnitResponse.model_validate(inv.unit),
+                "inventors": [InventorResponse.model_validate(rel.inventor) for rel in inv.inventors],
+                "owners": [OwnerResponse.model_validate(rel.owner) for rel in inv.owners],
+            }
+        )
+    return response
