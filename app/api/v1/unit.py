@@ -7,8 +7,8 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 from const.enum import UserType
 from db.db_connector import get_db
-from schemas.unit import UnitResponse, UnitCreate
-from repositories.unit_repositories import create_unit, get_unit, delete_unit
+from schemas.unit import UnitFilters, UnitResponse, UnitCreate
+from repositories.unit_repositories import create_unit, get_unit, delete_unit, get_units
 from schemas.user import UserResponse
 from services.auth_service import get_current_user
 from utils.exceptions import integrity_error_database, unauthorized, instance_not_found
@@ -104,3 +104,27 @@ async def delete_unit_endpoint(
 
     if resultado == 1:
         return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+@router.post("/units", tags=["vitrine"])
+async def get_invencoes_vitrine_endpoint(
+    unit_filter: UnitFilters,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Lista as unidades disponíveis no banco de dados.
+
+    **Parameters**:
+    - `unit_filters (InventioFilters)`: Schema contendo os filtros para busca.
+
+    **Returns**:
+    - `list`: Lista de dicionários contendo:
+      - `unit (UnitResponse)`: Lista contendo as unidades pós filtros
+    """
+    units = await get_units(db, unit_filter)
+    response = []
+    for unit in units:
+        response.append(
+            UnitResponse.model_validate(unit)
+        )
+    return response
