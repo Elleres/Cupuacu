@@ -22,13 +22,14 @@ else:
         swagger_ui_parameters={"docExpansion": "none"}
     )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"]
+# )
+
 app.include_router(router)
 
 # Não criar conta adm inicial em ambiente de teste
