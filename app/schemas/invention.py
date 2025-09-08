@@ -52,6 +52,8 @@ class InventionFilters(BaseModel):
 
     @field_validator("inv_trl")
     def check_trl(cls, v):
+        if v == None:
+            return v
         for i in v:
             if i < 1 or i > 9:
                 raise ValueError("inv_trl deve estar entre 1 e 9")
