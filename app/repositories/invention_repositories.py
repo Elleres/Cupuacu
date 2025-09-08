@@ -10,7 +10,7 @@ from models.inventor import Inventor
 from models.inventor_invention import InventorInvention
 from models.owner import Owner
 from models.unit import Unit
-from schemas.invention import InventionCreate, InventionFilters
+from schemas.invention import InventionCreate, InventionFilters, InventionResponse, InventionUpdate
 
 
 async def create_invention(
@@ -105,3 +105,22 @@ async def get_inventions(
 
     result = await db.execute(stmt)
     return result.scalars().all()
+
+async def update_invention(
+        db: AsyncSession,
+        invention_id: UUID,
+        invention_update: InventionUpdate,
+):
+    db_invention = await get_invention(db, invention_id)
+    
+    update_data = invention_update.model_dump(exclude_unset=True)
+    
+    for k, v in update_data.items():
+        setattr(db_invention, k, v)
+    
+
+    db.add(db_invention)
+    await db.commit()
+    await db.refresh(db_invention)
+
+    return db_invention.model_dump()
