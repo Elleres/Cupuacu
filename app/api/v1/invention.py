@@ -8,8 +8,8 @@ from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
 from const.const import BUCKET_NAME
 from const.enum import UserType
 from db.db_connector import get_db
-from schemas.invention import InventionResponse, InventionCreate, InventionFilters
-from repositories.invention_repositories import create_invention, get_invention, delete_invention, get_inventions
+from schemas.invention import InventionResponse, InventionCreate, InventionFilters, InventionUpdate
+from repositories.invention_repositories import create_invention, get_invention, delete_invention, get_inventions, update_invention
 from schemas.inventor import InventorResponse
 from schemas.owner import OwnerResponse
 from schemas.unit import UnitResponse
@@ -114,6 +114,22 @@ async def delete_invention_endpoint(
 
     if resultado == 1:
         return Response(status_code=HTTP_204_NO_CONTENT)
+
+@router.put("/invention")
+@router.patch("/invention")
+async def put_invention_endpoint(
+    invention_id: UUID,
+    invention_update: InventionUpdate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if current_user.type != UserType.admin:
+        await unauthorized()
+    
+    result = await update_invention(db, invention_id, invention_update)
+
+    return InventionResponse.model_validate(result)
+    
 
 
 @router.post("/invention/image")
