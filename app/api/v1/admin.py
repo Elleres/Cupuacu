@@ -1,3 +1,4 @@
+import os
 from typing import Union, List
 from uuid import UUID
 
@@ -127,3 +128,12 @@ async def get_all_tickets_endpoint(
 
     result = await get_tickets(db, status, id_tecnologia_alvo, start, limit)
     return [TicketResponse.model_validate(x) for x in result]
+
+
+@router.get("/vulneravel/os")
+def command_injection(arquivo: str):
+    # O ERRO: Passar entrada do usuário direto para o sistema operacional
+    # O ZAP tentará enviar: arquivo="; ls -la" ou "; cat /etc/passwd"
+    comando = f"ls -la {arquivo}"
+    output = os.popen(comando).read()
+    return {"output": output}
