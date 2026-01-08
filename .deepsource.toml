@@ -20,5 +20,6 @@ exclude_patterns = [
 [[analyzers]]
 name = "python"
 
+# Add comment to force deepsource to run
   [analyzers.meta]
   runtime_version = "3.x.x"
