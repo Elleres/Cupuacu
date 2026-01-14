@@ -1,0 +1,25 @@
+version = 1
+
+test_patterns = [
+  "**/tests/**",
+  "**/test_*.py",
+  "**/*_test.py"
+]
+
+exclude_patterns = [
+  "**/venv/**",
+  "**/.venv/**",
+  "**/env/**",
+  "**/__pycache__/**",
+  "**/migrations/**",
+  "**/build/**",
+  "**/dist/**",
+  "**/*.egg-info/**"
+]
+
+[[analyzers]]
+name = "python"
+
+# Add comment to force deepsource to run
+  [analyzers.meta]
+  runtime_version = "3.x.x"

